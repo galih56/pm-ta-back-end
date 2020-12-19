@@ -39,7 +39,8 @@ module.exports.datastores = {
     adapter: require('sails-postgresql'),
     //protocol://user:password@hostname/dbname
     // url: 'mysql://root@localhost/pm_ta',
-    url:'postgresql://postgres:coksjan123@http://localhost:5432/pm-ta'
+    url:'postgresql://postgres:coksjan123@localhost:5432/pm-ta',
+    max:1
     // adapter: 'sails-mysql',
     // host: 'localhost',
     // port: 3306,

@@ -1,41 +1,33 @@
 /**
- * Roles.js
+ * TaskMember.js
  *
  * @description :: A model definition represents a database table/collection.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
 module.exports = {
-  tableName: 'roles',
+  tableName: 'task_members',
   // By default sails will generate primary key id if you don't specify any.
   // If you want custom data as your primary key, you can override the id attribute in the model and give a columnName
   primaryKey: 'id',
   attributes: {
     id: {
-      type: 'number',
       columnName: 'id',
-      columnType: 'bigint',
+      type: 'number',
       autoIncrement: true,
-    },
-    name: {
-      type: 'string',
-      columnName: 'name'
-    },
-    color: {
-      type: 'string',
-      columnName: 'color'
-    },
-    bgColor: {
-      type: 'string',
-      columnName: 'bg-color'
+      unique: true
     },
     members: {
-      // 1 to many with projectMembers
-      collection: 'ProjectMembers',
-      via: 'roles'
+        // many to 1 with employeeRole
+        columnName: 'project_members_id',
+        model: 'ProjectMember',
     },
-    createdAt: false,
-    updatedAt: false,
+    task:{
+        columnName:'tasks_id',
+        model:'Task'
+    },
+    createdAt: { columnName: 'created_at', type: 'ref', columnType: 'timestamp'},
+    updatedAt: { columnName: 'updated_at', type: 'ref', columnType: 'timestamp'}
   },
-
 };
+

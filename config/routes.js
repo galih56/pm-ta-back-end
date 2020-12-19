@@ -9,28 +9,67 @@
  */
 
 module.exports.routes = {
+  //Users
+  'POST /login': 'UserController.login',
+  'POST /user': 'UserController.register',
+  'GET /user': 'UserController.find',
+  'GET /user/:id': 'UserController.findOne',
+  'GET /user/:id/project': 'UserController.getProjects',
+  'POST /user/:id/project': 'UserController.createProject',
+  'PATCH /user/:id': 'UserController.update',
+  'DELETE /user/:id': 'UserController.delete',
 
-  /***************************************************************************
-  *                                                                          *
-  * Make the view located at `views/homepage.ejs` your home page.            *
-  *                                                                          *
-  * (Alternatively, remove this and add an `index.html` file in your         *
-  * `assets` directory)                                                      *
-  *                                                                          *
-  ***************************************************************************/
+  //Project
+  'POST /project': 'ProjectController.create',
+  'GET /project': 'ProjectController.find',
+  'GET /project/:id': 'ProjectController.findOne',
+  'GET /project/:id/list': 'ProjectController.getListsBasedOnProject',
+  'PATCH /project/:id': 'ProjectController.update',
+  'DELETE /project/:id': 'ProjectController.delete',
 
-  '/user/:userId': { controller: 'UsersController', action: 'getUser' },
+  //List
+  'POST /list': 'ListController.create',
+  'GET /list': 'ListController.find',
+  'GET /list/:id': 'ListController.findOne',
+  'PATCH /list/:id': 'ListController.update',
+  'DELETE /list/:id': 'ListController.delete',
 
-  /***************************************************************************
-  *                                                                          *
-  * More custom routes here...                                               *
-  * (See https://sailsjs.com/config/routes for examples.)                    *
-  *                                                                          *
-  * If a request to a URL doesn't match any of the routes in this file, it   *
-  * is matched against "shadow routes" (e.g. blueprint routes).  If it does  *
-  * not match any of those, it is matched against static assets.             *
-  *                                                                          *
-  ***************************************************************************/
 
+  //List
+  'POST /tag': 'TagController.create',
+  'GET /tag': 'TagController.find',
+  'GET /tag/:id': 'TagController.findOne',
+  'PATCH /tag/:id': 'TagController.update',
+  'DELETE /tag/:id': 'TagController.delete',
+  
+  //Task
+  'POST /task': 'TaskController.create',
+  'GET /task': 'TaskController.find',
+  'GET /task/:id': 'TaskController.findOne',
+  'PATCH /task/:id': 'TaskController.update',
+  'DELETE /task/:id': 'TaskController.delete',
+  'POST /task/:id/checklist': 'TaskController.addChecklist',
+  'PATCH /task/:taskId/checklist/:checklistId': 'TaskController.updateChecklist',
+  'DELETE /task/:taskId/checklist/:checklistId': 'TaskController.removeChecklist',
+  
+  //TaskAttachment
+  'POST /files': 'TaskAttachmentController.create',
+  'GET /files': 'TaskAttachmentController.find',
+  'GET /files/:id': 'TaskAttachmentController.findOne',
+  'DELETE /files/:id': 'TaskAttachmentController.delete',
+
+  //ProjectMembers
+  'POST /member': 'ProjectMemberController.create',
+  'GET /member': 'ProjectMemberController.find',
+  'GET /member/:id': 'ProjectMemberController.findOne',
+  'PATCH /member/:id': 'ProjectMemberController.update',
+  'DELETE /member/:id': 'ProjectMemberController.delete',
+
+  //EmployeeRoles
+  'POST /emplyeerole': 'EmployeeRoleController.create',
+  'GET /emplyeerole': 'EmployeeRoleController.find',
+  'GET /emplyeerole/:id': 'EmployeeRoleController.findOne',
+  'PATCH /emplyeerole/:id': 'EmployeeRoleController.update',
+  'DELETE /emplyeerole/:id': 'EmployeeRoleController.delete',
 
 };

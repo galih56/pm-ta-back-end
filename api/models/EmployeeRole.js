@@ -11,28 +11,25 @@ module.exports = {
   attributes: {
     id: {
       columnName: 'id',
-      // type: 'integer',
-      columnType:'bigInt'
+      type: 'number',
       autoIncrement: true,
+      unique: true
     },
     name: {
       type: 'string',
       columnName: 'name',
-      columnType: 'varchar'
     },
     color: {
       type: 'string',
       columnName: 'color',
-      columnType: 'varchar'
     },
     bgColor: {
       type: 'string',
       columnName: 'bg-color',
-      columnType: 'varchar'
     },
     users: {
       // 1 to many with users
-      collection: 'Users',
+      collection: 'user',
       via: 'employeeRole'
     },
     createdAt: false,

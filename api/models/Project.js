@@ -12,28 +12,33 @@ module.exports = {
   primaryKey: 'id',
   attributes: {
     id: {
-      type: 'number',
       columnName: 'id',
-      columnType: 'bigint',
+      type: 'number',
       autoIncrement: true,
+      unique: true
     },
     title: {
       type: 'string',
       columnName: 'title',
-      columnType: 'varchar'
     },
     description: {
       type: 'string',
       columnName: 'description',
-      columnType: 'longtext'
+    },
+    estimationDeadline:{
+      type: 'ref', columnType: 'timestamp' ,
+      columnName: 'estimation_deadline',
     },
     members: {
-      collection: 'ProjectMembers',
-      via: 'projects'
+      collection: 'ProjectMember',
+      via: 'project'
     },
-    createdAt: { type: 'string', columnName: 'created_at' },
-    updatedAt: { type: 'string', columnName: 'updated_at' }
+    lists: {
+      collection: 'List',
+      via: 'project'
+    },
+    createdAt: { columnName: 'created_at', type: 'ref', columnType: 'timestamp' },
+    updatedAt: { columnName: 'updated_at', type: 'ref', columnType: 'timestamp' }
   },
-
 };
 

@@ -28,11 +28,13 @@ module.exports.security = {
   *                                                                          *
   ***************************************************************************/
 
-  // cors: {
-  //   allRoutes: false,
-  //   allowOrigins: '*',
-  //   allowCredentials: false,
-  // },
+  cors: {
+    allRoutes: true,
+    allowOrigins: '*',
+    allowOrigins: ['http://localhost:8080'],
+    allowRequestMethods: 'GET,PUT,POST,OPTIONS,HEAD,PATCH,DELETE',
+    allowRequestHeaders: 'Content-Type,Authorization'
+  },
 
 
   /****************************************************************************

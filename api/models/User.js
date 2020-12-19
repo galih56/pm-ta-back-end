@@ -4,18 +4,15 @@
  * @description :: A model definition represents a database table/collection.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
-
+const bcrypt = require("bcrypt");
 module.exports = {
   tableName: 'users',
-  // By default sails will generate primary key id if you don't specify any.
-  // If you want custom data as your primary key, you can override the id attribute in the model and give a columnName
-  primaryKey: 'id',
   attributes: {
     id: {
-      type: 'number',
       columnName: 'id',
-      columnType: 'bigint',
+      type: 'number',
       autoIncrement: true,
+      unique: true
     },
     name: {
       type: 'string',
@@ -24,7 +21,6 @@ module.exports = {
     password: {
       type: 'string',
       columnName: 'password',
-      encrypt: true
     },
     email: {
       type: 'string',
@@ -38,31 +34,54 @@ module.exports = {
     token: {
       type: 'string',
       columnName: 'token',
-      allowNull: true
     },
     profilePicturePath: {
       type: 'string',
       columnName: 'profile_picture_path',
-      allowNull: true
     },
     phoneNumber: {
-      type: 'string',
+      type:'string',
       columnName: 'phone_number',
-      allowNull: true
+    },
+    last_login: {
+      type: 'string',
+      columnName: 'last_login',
+      allowNull:true,
     },
     employeeRole: {
       // many to 1 with employeeRole
       columnName: 'employee_roles_id',
-      model: 'EmployeeRoles',
+      model: 'EmployeeRole',
     },
     asMember: {
       // 1 to many with projectMembers
-      collection: 'ProjectMembers',
-      via: 'users'
+      collection: 'ProjectMember',
+      via: 'user'
+    },
+    logs:{
+      collection: 'ActivityLog',
+      via: 'user'
     },
     createdAt: false,
     updatedAt: false,
   },
+  customToJSON: function() {
+    //delete password from json
+    return _.omit(this, ['password'])
+  },
+  beforeCreate: function(values, callback) {
+        // Hash password
+        bcrypt.hash(values.password, 10, function(err, hash) {
+            if (err) return callback(err);
+            values.password = hash;
 
+            //Delete the passwords so that they are not stored in the DB
+            // delete values.password;
+            // delete values.confirmation;
+
+            //calling callback() with an argument returns an error. Useful for canceling the entire operation if some criteria fails.
+            callback();
+        });
+    },
 };
 
