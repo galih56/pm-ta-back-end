@@ -17,17 +17,28 @@ module.exports = {
       autoIncrement: true,
       unique: true
     },
-    members: {
-        // many to 1 with employeeRole
-        columnName: 'project_members_id',
-        model: 'ProjectMember',
+    member: {
+      columnName: 'project_members_id',
+      model: 'ProjectMember',
     },
-    task:{
-        columnName:'tasks_id',
-        model:'Task'
+    task: {
+      columnName: 'tasks_id',
+      model: 'Task'
     },
-    createdAt: { columnName: 'created_at', type: 'ref', columnType: 'timestamp'},
-    updatedAt: { columnName: 'updated_at', type: 'ref', columnType: 'timestamp'}
+    user: {
+      columnName: 'users_id',
+      model: 'User'
+    },
+    createdAt: { 
+      type: 'ref', 
+      columnName: 'created_at', 
+      columnType: 'timestamp' 
+    },
+    updatedAt: { 
+      type: 'ref', 
+      columnName: 'updated_at', 
+      columnType: 'timestamp' 
+    }
   },
 };
 

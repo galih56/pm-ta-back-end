@@ -10,12 +10,12 @@
 
 module.exports.policies = {
 
-  /***************************************************************************
-  *                                                                          *
-  * Default policy for all controllers and actions, unless overridden.       *
-  * (`true` allows public access)                                            *
-  *                                                                          *
-  ***************************************************************************/
+	/***************************************************************************
+	*                                                                          *
+	* Default policy for all controllers and actions, unless overridden.       *
+	* (`true` allows public access)                                            *
+	*                                                                          *
+	***************************************************************************/
 
 	'*': true,
 
@@ -25,52 +25,52 @@ module.exports.policies = {
 		'update': 'isAuthenticated',
 		'delete': 'isAuthenticated',
 	},
-	ProjectController:{
+	ProjectController: {
 		// 'find':'isAuthenticated',
 		// 'findOne':'isAuthenticated',
 		// 'create':'isAuthenticated',
 		'update': 'isAuthenticated',
-		'delete':'isAuthenticated',
+		'delete': 'isAuthenticated',
 	},
-	ProjectMemberController:{
-		'create':'isAuthenticated',
+	ProjectMemberController: {
+		'create': 'isAuthenticated',
 		'update': 'isAuthenticated',
-		'delete':'isAuthenticated',
+		'delete': 'isAuthenticated',
 	},
-	TaskController:{
+	TaskController: {
 		// 'find':'isAuthenticated',
 		// 'findOne':'isAuthenticated',
-		'create':'isAuthenticated',
+		'create': 'isAuthenticated',
 		'update': 'isAuthenticated',
-		'delete':'isAuthenticated',
-		'addChecklist':'isAuthenticated',
-		'removeChecklist':'isAuthenticated',
-		'updateChecklist':'isAuthenticated',
+		'delete': 'isAuthenticated',
+		'addChecklist': 'isAuthenticated',
+		'removeChecklist': 'isAuthenticated',
+		'updateChecklist': 'isAuthenticated',
 	},
-	TaskMemberController:{
-		'create':'isAuthenticated',
+	TaskMemberController: {
+		'create': 'isAuthenticated',
 		'update': 'isAuthenticated',
-		'delete':'isAuthenticated',
+		'delete': 'isAuthenticated',
 	},
-	EmployeeRoleController:{
-		'create':'isAuthenticated',
+	OccupationController: {
+		'create': 'isAuthenticated',
 		'update': 'isAuthenticated',
-		'delete':'isAuthenticated',
+		'delete': 'isAuthenticated',
 	},
-	CommentController:{
-		'create':'isAuthenticated',
+	CommentController: {
+		'create': 'isAuthenticated',
 		'update': 'isAuthenticated',
-		'delete':'isAuthenticated',
+		'delete': 'isAuthenticated',
 	},
-	ListController:{
-		'create':'isAuthenticated',
+	ListController: {
+		'create': 'isAuthenticated',
 		'update': 'isAuthenticated',
-		'delete':'isAuthenticated',
+		'delete': 'isAuthenticated',
 	},
-	ActivityLogController:{
-		'create':'isAuthenticated',
+	ActivityLogController: {
+		'create': 'isAuthenticated',
 		'update': 'isAuthenticated',
-		'delete':'isAuthenticated',
+		'delete': 'isAuthenticated',
 	},
 };
 

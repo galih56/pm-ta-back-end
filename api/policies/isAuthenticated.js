@@ -9,21 +9,19 @@
  */
 
 module.exports = async function (req, res, next) {
-    const verfyJwt=sails.helpers.verifyJwt.with({
+    const verfyJwt = sails.helpers.verifyJwt.with({
         req: req,
         res: res
     }).switch({
         error: function (err) {
             return res.serverError(err)
         },
-        invalid: function (err) {
+        invalid: function () {
             // if this is not an HTML-wanting browser, e.g. AJAX/sockets/cURL/etc.,
             // send a 401 response letting the user agent know they need to login to
             // access this endpoint.
-            console.log('wantsJSON',req.wantsJSON);
-            if (req.wantsJSON) {
-                return res.sendStatus(401)
-            }
+            if (req.wantsJSON) return res.sendStatus(401);
+            if (!req.session.user) return res.sendStatus(401);
             // otherwise if this is an HTML-wanting browser, do a redirect.
             return res.sendStatus(403)
         },

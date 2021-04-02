@@ -30,14 +30,3 @@ module.exports = {
     },
 };
 
-
-
-
-// color: {
-//   type: 'string',
-//   columnName: 'color'
-// },
-// bgColor: {
-//   type: 'string',
-//   columnName: 'bg-color'
-// },

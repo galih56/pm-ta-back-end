@@ -1,12 +1,12 @@
 /**
- * EmployeeRole.js
+ * Occupation.js
  *
  * @description :: A model definition represents a database table/collection.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
 module.exports = {
-  tableName: 'employee_roles',
+  tableName: 'occupations',
   primaryKey: 'id',
   attributes: {
     id: {
@@ -22,15 +22,29 @@ module.exports = {
     color: {
       type: 'string',
       columnName: 'color',
+      allowNull: true
     },
     bgColor: {
       type: 'string',
       columnName: 'bg-color',
+      allowNull: true
     },
     users: {
-      // 1 to many with users
-      collection: 'user',
-      via: 'employeeRole'
+      collection: 'User',
+      via: 'occupation'
+    },
+    parentRelations: {
+      collection: 'OccupationRelation',
+      via: 'child'
+    },
+    childrenRelations: {
+      collection: 'OccupationRelation',
+      via: 'parent'
+    },
+    root: {
+      type: 'boolean',
+      columnName: 'root',
+      allowNull: true
     },
     createdAt: false,
     updatedAt: false,

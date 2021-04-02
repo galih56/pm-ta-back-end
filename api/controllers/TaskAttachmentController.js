@@ -5,101 +5,175 @@
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
 
-const moment=require('moment-timezone');
+const moment = require('moment-timezone');
 const fs = require('fs');
 
 module.exports = {
-	find: async (req,res)=>{
+	find: async (req, res) => {
 		try {
-			let files = await TaskAttachment.find().populate('user').populate('task');
-	        return res.send(files);
-	    }
-	    catch (err){
-	      return res.serverError(err);
-	    }
+			var files = await File.getDatastore().sendNativeQuery(`
+			SELECT f.id as files_id, f.name, 
+					f.type, f.size, f.icon, 
+					f.path, f.tasks_id, f.users_id,
+					ta.*, u.*
+				FROM files as f
+			INNER JOIN task_attachments as ta
+				ON f.id=ta.files_id
+			INNER JOIN task as t
+				ON t.id=ta.tasks_id
+			INNER JOIN users as u
+				ON f.users_id=u.id
+			`, []);
+
+			return res.send(files.rows);
+		}
+		catch (err) {
+			return res.serverError(err);
+		}
 	},
-    findOne: async (req, res) => {
-    	let params=req.allParams();
+	findOne: async (req, res) => {
+		let params = req.allParams();
 		try {
-	        if (params.id) {
-	            let files = await TaskAttachment.find({ id: params.id }).populate('user').populate('task');
-	            if (files.length > 0) {
-	            	var task=files[0];
-	                return res.send(task);
-	            }
-    			return res.notFound();
-	        }
-    		return res.notFound();
-        }
-	    catch (err){
-	    	console.log(err)
-	      	return res.serverError(err);
-	    }
-    },
-    create: async (req, res) => {
-    	let params=req.allParams();
-    	if(!params.userId) res.serverError('userId not found'); 
-    	if(!params.taskId) res.serverError('taskId not found');
+			if (params.id) {
+				var files = await File.getDatastore().sendNativeQuery(`
+					SELECT f.id as files_id, f.name, 
+							f.type, f.size, f.icon, 
+							f.path, f.tasks_id, f.users_id,
+							ta.*, u.*
+						FROM files as f
+					INNER JOIN task_attachments as ta
+						ON f.id=ta.files_id
+					INNER JOIN task as t
+						ON t.id=ta.tasks_id
+					INNER JOIN users as u
+						ON f.users_id=u.id
+					WHERE pm.users_id =  $1 
+					`, [params.id]);
+					
+				if (files.rows.length > 0) {
+					var file = files.rows[0];
+					return res.send(file);
+				}
+				return res.notFound();
+			}
+			return res.notFound();
+		}
+		catch (err) {
+			console.log(err)
+			return res.serverError(err);
+		}
+	},
+	create: async (req, res) => {
+		let params = req.allParams();
+		let errors = false;
+		
+		if (!params.userId || !params.taskId || !params.source) {
+			errors = true;
+			var str_errors = '';
+			if (!params.userId) str_errors += ' userId';
+			if (!params.taskId) str_errors += ' taskId';
+			if (!params.source) str_errors += ' source';
+			return res.serverError('Missing parameters : ' + str_errors);
+		}
 
-		var dbRecords=[];
-		return await req.file('files').upload({
-		    // don't allow the total upload size to exceed ~50MB
-		    maxBytes: 100000000,
-		    dirname: `../../assets/tasks/${params.taskId}/attachments/`
-		  }, async (err, uploadedFiles)=>{
-		    if (err)  return res.serverError(err); 
+		if (!errors) {
+			if (params.source == 'upload') {
+				await req.file('files').upload({
+					maxBytes: 100000000,
+					dirname: `../../assets/tasks/${params.taskId}/`
+				}, async (err, uploadedFiles) => {
+					var dbRecords = [];
+					if (err) return res.serverError(err);
 
-		    // If no files were uploaded, respond with an error.
-		    if (uploadedFiles.length === 0) return res.badRequest('No file was uploaded'); 
+					if (uploadedFiles.length === 0) return res.badRequest('No file was uploaded');
 
-		    try{
-			    for (var i = 0; i < uploadedFiles.length; i++) {
-			    	var currentPath=uploadedFiles[i].fd.split('\\');
-			    	const uploadedFileName=currentPath[currentPath.length-1];
-			    	const originalFilename=uploadedFiles[i].filename;
-			    	const type=uploadedFiles[i].type;
-			    	const size=uploadedFiles[i].size;
-			    	const path=`tasks/${params.taskId}/attachments/`+uploadedFileName;
-			    	
-			    	//Save metadata into db
-				    const attachment=await TaskAttachment.create({
-				    	name:uploadedFiles[i].filename,
-				    	size:size,
-				    	type:type,
-				    	path:path,
-				    	user:params.userId,
-				    	task:params.taskId,
-				    	source:'upload',
-				    	createdAt:moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
-				    	updatedAt:moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss')
-				    }).fetch();
-				    dbRecords.push(attachment);
-			    }
-		    }catch(error){
-		    	console.log(error)
-		    	res.serverError(error);
-		    }
-		    return res.ok(dbRecords);
-		  });
-    },
-	delete: async (req, res)=>{
+					for (var i = 0; i < uploadedFiles.length; i++) {
+						var currentPath = uploadedFiles[i].fd.split('\\');
+						const uploadedFileName = currentPath[currentPath.length - 1];
+						const type = uploadedFiles[i].type;
+						const size = uploadedFiles[i].size;
+						const path = `tasks/${params.taskId}/` + uploadedFileName;
+
+						const file = await File.create({
+							name: uploadedFiles[i].filename, size: size,
+							type: type, path: path, user: params.userId,
+							task: params.taskId, source: 'upload',
+							createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
+							updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss')
+						}).fetch();
+
+						const task_attachment=await TaskAttachment.create({
+							file:file.id,
+							task:params.taskId
+						}).fetch();
+						
+						dbRecords.push({
+							id:task_attachment.id,
+							...file
+						});
+					}
+					return res.ok(dbRecords);
+				})
+			}
+
+			if (params.source == 'google-drive') {
+				let dbRecords = [];
+				if (params.files.length === 0) return res.badRequest('No file was choosen');
+				var files = params.files;
+				for (let i = 0; i < files.length; i++) {
+					var file = files[i];
+					
+					file = await File.create({
+						name: file.name, size: file.sizeBytes,
+						type: file.mimeType, path: file.url,
+						user: params.userId, task: params.taskId,
+						icon: file.iconUrl,  source: 'google-drive',
+						createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
+						updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss')
+					}).fetch();
+
+					const task_attachment=await TaskAttachment.create({
+						file:file.id,
+						task:params.taskId
+					}).fetch();
+					
+					dbRecords.push({
+						id:task_attachment.id,
+						...file
+					});
+				}
+				return res.ok(dbRecords);
+			}
+		}
+	},
+	delete: async (req, res) => {
 		try {
 			let params = req.allParams();
 			let files = await TaskAttachment.find({ id: params.id });
-            if (files.length > 0) {
-            	var file=files[0];
-            	console.log('Unlink : ',`${sails.config.appPath}/assets/${file.path}`);
-            	const dir=`${sails.config.appPath}/assets/${file.path}`
-				await fs.unlink(dir, (error) => {
-					if (error) {
-						console.log('Unlink Error : ',error);
-						throw error
-					}
-				  	console.log('successfully deleted : '+`${sails.config.appPath}/assets/${file.path}`);
-				});
-            	await TaskAttachment.destroy({ id: params.id });
-                return res.ok(params.id);
-            }
+			if (files.length > 0) {
+				var file = files[0];
+				console.log(file)
+				if (file.source == 'google-drive') {
+					await TaskAttachment.destroy({ id: params.id });
+					return res.ok(params.id);
+				} else {
+					const dir = `${sails.config.appPath}/assets/${file.path}`;
+					await fs.stat(dir, async function (err, stat) {
+						if (err == null) {
+							await fs.unlink(dir, (error) => {
+								if (error) throw error;
+							});
+							await TaskAttachment.destroy({ id: params.id });
+							return res.ok(params.id);
+						} else if (err.code === 'ENOENT') {
+							console.log('not found');
+							return res.notFound("File not found");
+						} else {
+							return res.serverError(err.code);
+						}
+					});
+				}
+			}
 		} catch (error) {
 			return res.serverError(error);
 		}

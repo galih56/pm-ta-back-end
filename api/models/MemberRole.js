@@ -30,7 +30,6 @@ module.exports = {
       columnName: 'bg-color'
     },
     members: {
-      // 1 to many with projectMembers
       collection: 'ProjectMember',
       via: 'role'
     },

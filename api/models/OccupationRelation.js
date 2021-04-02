@@ -1,12 +1,12 @@
 /**
- * TaskAttachments.js
+ * Occupation.js
  *
  * @description :: A model definition represents a database table/collection.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
- module.exports = {
-    tableName: 'task_attachments',
+module.exports = {
+    tableName: 'occupation_relations',
     primaryKey: 'id',
     attributes: {
         id: {
@@ -15,13 +15,13 @@
             autoIncrement: true,
             unique: true
         },
-        file: {
-            columnName: 'files_id',
-            model: 'File'
+        parent: {
+            columnName: 'parent_id',
+            model: 'Occupation'
         },
-        task: {
-            columnName: 'tasks_id',
-            model: 'Task'
+        child: {
+            columnName: 'child_id',
+            model: 'Occupation'
         },
         createdAt: false,
         updatedAt: false,

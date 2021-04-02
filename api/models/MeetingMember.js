@@ -1,12 +1,13 @@
 /**
- * ProjectMembers.js
+ * MeetingMember.js
  *
  * @description :: A model definition represents a database table/collection.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
 module.exports = {
-  tableName: 'project_members',
+  tableName: 'meeting_members',
+  primaryKey: 'id',
   attributes: {
     id: {
       columnName: 'id',
@@ -16,23 +17,16 @@ module.exports = {
     },
     user: {
       columnName: 'users_id',
-      model: 'User', // many to 1 with user
+      model: 'User'
     },
-    taskMember: {
-      collection: 'TaskMember',
-      via: 'member'
-    },
-    project: {
-      columnName: 'projects_id',
-      model: 'Project',
-      required: true,
-    },
-    role: {
-      columnName: 'roles_id', //member has 1 role
-      model: 'MemberRole',
+    meeting: {
+      columnName: 'meetings_id',
+      model: 'Meeting'
     },
     createdAt: { columnName: 'created_at', type: 'ref', columnType: 'timestamp' },
     updatedAt: { columnName: 'updated_at', type: 'ref', columnType: 'timestamp' }
   },
+
 };
+
 

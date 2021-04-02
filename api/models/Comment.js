@@ -26,8 +26,8 @@ module.exports = {
           columnName: 'description',
         },
         creator: {
-            columnName:'project_members_id',
-            model: 'ProjectMember',
+            columnName:'users_id',
+            model: 'User',
         },
         task:{
             columnName:'tasks_id',

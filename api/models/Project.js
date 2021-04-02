@@ -26,7 +26,8 @@ module.exports = {
       columnName: 'description',
     },
     estimationDeadline:{
-      type: 'ref', columnType: 'timestamp' ,
+      type: 'ref', 
+      columnType: 'timestamp' ,
       columnName: 'estimation_deadline',
     },
     members: {
@@ -37,8 +38,20 @@ module.exports = {
       collection: 'List',
       via: 'project'
     },
-    createdAt: { columnName: 'created_at', type: 'ref', columnType: 'timestamp' },
-    updatedAt: { columnName: 'updated_at', type: 'ref', columnType: 'timestamp' }
+    meetings: {
+      collection: 'Meeting',
+      via: 'project'
+    },
+    createdAt: { 
+      columnName: 'created_at', 
+      type: 'ref', 
+      columnType: 'timestamp' 
+    },
+    updatedAt: { 
+      columnName: 'updated_at', 
+      type: 'ref', 
+      columnType: 'timestamp' 
+    }
   },
 };
 
