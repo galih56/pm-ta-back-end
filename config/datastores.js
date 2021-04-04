@@ -40,6 +40,7 @@ module.exports.datastores = {
     //protocol://user:password@hostname/dbname
     // url: 'mysql://root@localhost/pm_ta',
     url:'postgresql://postgres:coksjan123@localhost:5432/ta-pm',
+    // url:'postgres://livycgyvolwpxq:0b174f854507fc14d8e02c431368a9252772135744f7ff3f8cbb5b6d2c191e20@ec2-18-204-101-137.compute-1.amazonaws.com:5432/ddcop88hoeum2t',
     max:1
   },
 

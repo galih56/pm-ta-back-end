@@ -1,12 +1,4 @@
 /**
- * Staging environment settings
- * (sails.config.*)
- *
- * This is mostly a carbon copy of the production environment settings
- * in config/env/production.js, but with the overrides listed below.
- * For more detailed information and links about what these settings do
- * see the production config file.
- *
  * > This file takes effect when `sails.config.environment` is "staging".
  * > But note that NODE_ENV should still be "production" when lifting
  * > your app in the staging environment.  In other words:
@@ -39,13 +31,7 @@ module.exports = Object.assign({}, PRODUCTION_CONFIG, {
 
   sockets: Object.assign({}, PRODUCTION_CONFIG.sockets, {
 
-    onlyAllowOrigins: [
-      'http://localhost:1337',
-      // 'https://example-staging.herokuapp.com',
-      // 'http://example-staging.herokuapp.com',
-      // 'https://staging.example.com',
-      // 'http://staging.example.com',
-    ],
+    onlyAllowOrigins: ['http://localhost:8080','http://localhost:3000','http://localhost:1337'],
     //--------------------------------------------------------------------------
     // /\  Hard-code a staging-only override for allowed origins.
     // ||  (or set this array via JSON-encoded system env var)
