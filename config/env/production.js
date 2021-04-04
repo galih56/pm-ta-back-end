@@ -53,9 +53,9 @@ module.exports = {
     trustProxy: true,
   },
 
-  custom: {
-     baseUrl: '/',
-    //  internalEmailAddress: 'support@example.com',
+   custom: {
+     baseUrl: 'https://ta-pm-sailsjs.herokuapp.com',
+     internalEmailAddress: 'support@example.com',
   },
  
   // port: 80,
