@@ -53,12 +53,10 @@ module.exports = {
     trustProxy: true,
   },
 
-  /*
-   custom: {
-     baseUrl: 'https://example.com',
-     internalEmailAddress: 'support@example.com',
+  custom: {
+     baseUrl: '/',
+    //  internalEmailAddress: 'support@example.com',
   },
-  */
  
   // port: 80,
   // ssl: false,
