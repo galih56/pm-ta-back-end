@@ -9,8 +9,6 @@ module.exports = {
     default: {
       adapter: require('sails-postgresql'),
       url:process.env.DATABASE_URL,
-      max:1,
-      ssl:false
     },
   },
 
@@ -59,5 +57,5 @@ module.exports = {
   },
  
   // port: 80,
-  // ssl: false,
+  ssl: false,
 };
