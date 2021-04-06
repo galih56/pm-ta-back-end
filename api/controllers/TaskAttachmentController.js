@@ -82,41 +82,9 @@ module.exports = {
 			if (!params.source) str_errors += ' source';
 			return res.serverError('Missing parameters : ' + str_errors);
 		}
-		console.log(params);
 		if (!errors) {
 			if (params.source == 'upload') {
 				var dbRecords = [];
-				if (err) return res.serverError(err);
-				/*
-				if (uploadedFiles.length === 0) return res.badRequest('No file was uploaded');
-
-				for (var i = 0; i < uploadedFiles.length; i++) {
-					var currentPath = uploadedFiles[i].fd.split('\\');
-					const uploadedFileName = currentPath[currentPath.length - 1];
-					const type = uploadedFiles[i].type;
-					const size = uploadedFiles[i].size;
-					const path = `tasks/${params.taskId}/` + uploadedFileName;
-
-					const file = await File.create({
-						name: uploadedFiles[i].filename, size: size,
-						type: type, path: path, user: params.userId,
-						task: params.taskId, source: 'upload',
-						createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
-						updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss')
-					}).fetch();
-
-					const task_attachment=await TaskAttachment.create({
-						file:file.id,
-						task:params.taskId
-					}).fetch();
-					
-					dbRecords.push({
-						id:task_attachment.id,
-						...file
-					});
-				}
-				return res.ok(dbRecords);
-				/*
 				await req.file('files').upload({
 					maxBytes: 100000000,
 					dirname: `../../assets/tasks/${params.taskId}/`
@@ -152,8 +120,7 @@ module.exports = {
 						});
 					}
 					return res.ok(dbRecords);
-				})
-				*/
+				});
 			}
 
 			if (params.source == 'google-drive') {

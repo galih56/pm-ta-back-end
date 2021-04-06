@@ -33,6 +33,10 @@ module.exports = {
       type: 'string',
       columnName: 'source',
     },
+    base64: {
+      type: 'string',
+      columnName: 'base64',
+    },
     icon: {
       type: 'string',
       columnName: 'icon',
