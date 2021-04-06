@@ -8,13 +8,6 @@
 const moment = require('moment-timezone');
 const fs = require('fs');
 
-// function to encode file data to base64 encoded string
-function base64_encode(file) {
-	// read binary data
-	var bitmap = fs.readFileSync(file);
-	// convert binary data to base64 encoded string
-	return new Buffer(bitmap).toString('base64');
-}
 module.exports = {
 	find: async (req, res) => {
 		try {
@@ -84,7 +77,9 @@ module.exports = {
 		}
 		if (!errors) {
 			if (params.source == 'upload') {
+				return console.log(req.file('files'))
 				var dbRecords = [];
+				/*
 				await req.file('files').upload({
 					maxBytes: 100000000,
 					dirname: `../../assets/tasks/${params.taskId}/`
@@ -104,7 +99,7 @@ module.exports = {
 						const file = await File.create({
 							name: uploadedFiles[i].filename, size: size,
 							type: type, path: path, user: params.userId,
-							task: params.taskId, source: 'upload',
+							source: 'upload',
 							createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
 							updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss')
 						}).fetch();
@@ -121,6 +116,7 @@ module.exports = {
 					}
 					return res.ok(dbRecords);
 				});
+					*/
 			}
 
 			if (params.source == 'google-drive') {
@@ -133,8 +129,7 @@ module.exports = {
 					file = await File.create({
 						name: file.name, size: file.sizeBytes,
 						type: file.mimeType, path: file.url,
-						user: params.userId, task: params.taskId,
-						icon: file.iconUrl,  source: 'google-drive',
+						user: params.userId, icon: file.iconUrl,  source: 'google-drive',
 						createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
 						updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss')
 					}).fetch();
