@@ -9,6 +9,9 @@ module.exports = {
     default: {
       adapter: require('sails-postgresql'),
       url:process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false
+      }
     },
   },
 
@@ -55,7 +58,4 @@ module.exports = {
      baseUrl: 'https://ta-pm-sailsjs.herokuapp.com',
      internalEmailAddress: 'support@example.com',
   },
- 
-  // port: 80,
-  ssl: false,
 };
