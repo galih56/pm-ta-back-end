@@ -31,7 +31,7 @@ module.exports = Object.assign({}, PRODUCTION_CONFIG, {
 
   sockets: Object.assign({}, PRODUCTION_CONFIG.sockets, {
 
-    onlyAllowOrigins: ['http://localhost:8080','http://localhost:3000','http://localhost:1337',,'https://ta-pm-reactjs.herokuapp.com/'],
+    onlyAllowOrigins: ['http://localhost:8080','http://localhost:3000','http://localhost:1337','https://ta-pm-reactjs.herokuapp.com'],
     //--------------------------------------------------------------------------
     // /\  Hard-code a staging-only override for allowed origins.
     // ||  (or set this array via JSON-encoded system env var)
