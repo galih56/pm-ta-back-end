@@ -334,16 +334,12 @@ module.exports = {
 			  },
 			});
 			const zoomUserData = await zoomUserRes.json();
-			/* 
-			  Encrypt and store below details to your database:
-				zoomUserData.email
-				zoomUserData.account_id
-				zoomData.access_token
-				zoomData.refresh_token
-				zoomData.expires_in // convert it to time by adding these seconds to current time
-			*/
 			return res.send({
-			  /* Return necessary data to frontend */
+				email:zoomUserData.email,
+				account_id:zoomUserData.account_id,
+				access_token:zoomData.access_token,
+				refresh_token:zoomData.refresh_token,
+				expires_in: zoomData.expires_in 
 			});
 		  } catch (e) {
 			  console.log('Zoom Authentication Errors : ',e);
