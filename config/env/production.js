@@ -28,7 +28,7 @@ module.exports = {
   security: {
     cors: {
       allRoutes: true,
-      allowOrigins: ['http://localhost:8080','http://localhost:3000'],
+      allowOrigins: ['http://localhost:8080','http://localhost:3000','https://ta-pm-reactjs.herokuapp.com/'],
       allowRequestMethods: 'GET,PUT,POST,OPTIONS,HEAD,PATCH,DELETE',
       allowRequestHeaders: 'Content-Type,Authorization'
     },
