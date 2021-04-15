@@ -308,6 +308,43 @@ module.exports = {
 			return res.serverError(err);
 		}
 	},
+	zoomAuthentication:function (req,res){
+		try {
+			const b = Buffer.from(process.env.ZOOM_API_KEY + ":" + process.env.ZOOM_API_SECRET);
+			const zoomRes = await fetch(`https://zoom.us/oauth/token?grant_type=authorization_code&code=${req.body.code}&redirect_uri=${process.env.ZOOM_REDIRECT_URL}`, {
+			  method: "POST",
+			  headers: {
+				Authorization: `Basic ${b.toString("base64")}`,
+			  },
+			});
+			if(!zoomRes.ok)
+			  return res.status(401).send("Could not connect with Zoom");
+			const zoomData = await zoomRes.json();
+			if (zoomData.error)
+			  return res.status(401).send("Could not connect with Zoom");
+			// Retreive user details
+			const zoomUserRes = await fetch("https://api.zoom.us/v2/users/me", {
+			  method: "GET",
+			  headers: {
+				Authorization: `Bearer ${zoomData.access_token}`,
+			  },
+			});
+			const zoomUserData = await zoomUserRes.json();
+			/* 
+			  Encrypt and store below details to your database:
+				zoomUserData.email
+				zoomUserData.account_id
+				zoomData.access_token
+				zoomData.refresh_token
+				zoomData.expires_in // convert it to time by adding these seconds to current time
+			*/
+			return res.send({
+			  /* Return necessary data to frontend */
+			});
+		  } catch (e) {
+			return res.status(500).send("Something went wrong");
+		  }
+	},
 	sendVerificationMail: async function (req, res) {
 		let newUser = {
 			name: 'teshalo', password: 'password',
