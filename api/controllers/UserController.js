@@ -4,6 +4,7 @@
  * @description :: Server-side actions for handling incoming requests.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
+var fetch = require("node-fetch");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const moment = require('moment-timezone');
@@ -308,15 +309,18 @@ module.exports = {
 			return res.serverError(err);
 		}
 	},
-	zoomAuthentication:function (req,res){
+	zoomAuthentication:async function (req,res){
+		var params=req.allParams();
 		try {
-			const b = Buffer.from(process.env.ZOOM_API_KEY + ":" + process.env.ZOOM_API_SECRET);
-			const zoomRes = await fetch(`https://zoom.us/oauth/token?grant_type=authorization_code&code=${req.body.code}&redirect_uri=${process.env.ZOOM_REDIRECT_URL}`, {
+			const b = Buffer.from(process.env.ZOOM_API_OAUTH_CLIENT_ID+ ":" + process.env.ZOOM_API_OAUTH_CLIENT_SECRET);
+			console.log('B : ',b)
+			const zoomRes = await fetch(`https://zoom.us/oauth/token?grant_type=authorization_code&code=${params.code}&redirect_uri=${process.env.ZOOM_REDIRECT_URL}`, {
 			  method: "POST",
 			  headers: {
 				Authorization: `Basic ${b.toString("base64")}`,
 			  },
 			});
+			console.log(zoomRes)
 			if(!zoomRes.ok)
 			  return res.status(401).send("Could not connect with Zoom");
 			const zoomData = await zoomRes.json();
@@ -342,6 +346,7 @@ module.exports = {
 			  /* Return necessary data to frontend */
 			});
 		  } catch (e) {
+			  console.log('Zoom Authentication Errors : ',e);
 			return res.status(500).send("Something went wrong");
 		  }
 	},

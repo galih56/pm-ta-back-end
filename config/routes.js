@@ -13,6 +13,7 @@ module.exports.routes = {
   'POST /login': 'UserController.login',
   'POST /logout': 'UserController.logout',
   'POST /zoom-authentication':'UserController.zoomAuthentication',
+  'GET /zoom-authentication':'UserController.zoomAuthentication',
   'POST /user': 'UserController.register',
   'GET /user': 'UserController.find',
   'GET /user/:id': 'UserController.findOne',
