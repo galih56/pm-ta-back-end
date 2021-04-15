@@ -7,6 +7,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const moment = require('moment-timezone');
+const https = require('https');
 
 module.exports = {
 	find: async (req, res) => {

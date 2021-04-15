@@ -1,0 +1,13 @@
+u«Zµìmþ™ZŠvÚ±î¸
+Coding Simplicity
+	is.js
+
+Back-End
+	express.js
+	fs-extra (file system)
+	pass-meter (password strength tester)
+	
+Front-end
+	anime.js
+
+https://demos.creative-tim.com/notus-react/

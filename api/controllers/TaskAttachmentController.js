@@ -66,7 +66,6 @@ module.exports = {
 	create: async (req, res) => {
 		let params = req.allParams();
 		let errors = false;
-		
 		if (!params.userId || !params.taskId || !params.source) {
 			errors = true;
 			var str_errors = '';
@@ -77,9 +76,88 @@ module.exports = {
 		}
 		if (!errors) {
 			if (params.source == 'upload') {
-				return console.log(req.file('files'))
 				var dbRecords = [];
-				/*
+				if(params.files){
+					for (let i = 0; i < params.files.length; i++) {
+						var file = params.files[i];
+
+						file = await File.create({
+							name: file.name, size: file.size,
+							type: file.type, path: file.path, user: params.userId,
+							base64:file.base64,
+							source: 'upload',
+							createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
+							updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss')
+						}).fetch();
+
+						const task_attachment=await TaskAttachment.create({
+							file:file.id,
+							task:params.taskId
+						}).fetch();
+						
+						dbRecords.push({
+							id:task_attachment.id,
+							...file
+						});
+					}
+					return res.ok(dbRecords);
+				}
+			}
+			
+			if (params.source == 'pick') {
+				var dbRecords = [];
+				const task_attachment=await TaskAttachment.create({
+					file:params.fileId, task:params.taskId
+				}).fetch();
+				
+				const file = await File.findOne({id:params.fileId});
+
+				dbRecords.push({
+					id:task_attachment.id, ...file
+				});
+				return res.ok(dbRecords);
+			}
+			
+			if (params.source == 'google-drive') {
+				let dbRecords = [];
+				if (params.files.length === 0) return res.badRequest('No file was choosen');
+				var files = params.files;
+				for (let i = 0; i < files.length; i++) {
+					var file = files[i];
+					
+					file = await File.create({
+						name: file.name, size: file.sizeBytes,
+						type: file.mimeType, path: file.url,
+						user: params.userId, icon: file.iconUrl,  
+						source: 'google-drive',
+						createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
+						updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss')
+					}).fetch();
+
+					const task_attachment=await TaskAttachment.create({
+						file:file.id, task:params.taskId
+					}).fetch();
+					
+					dbRecords.push({
+						id:task_attachment.id, ...file
+					});
+				}
+				return res.ok(dbRecords);
+			}
+		}
+	},
+	delete: async (req, res) => {
+		try {
+			let params = req.allParams();
+			await TaskAttachment.destroy({ id: params.id });
+		} catch (error) {
+			return res.serverError(error);
+		}
+	},
+};
+
+
+/*
 				await req.file('files').upload({
 					maxBytes: 100000000,
 					dirname: `../../assets/tasks/${params.taskId}/`
@@ -117,67 +195,4 @@ module.exports = {
 					return res.ok(dbRecords);
 				});
 					*/
-			}
-
-			if (params.source == 'google-drive') {
-				let dbRecords = [];
-				if (params.files.length === 0) return res.badRequest('No file was choosen');
-				var files = params.files;
-				for (let i = 0; i < files.length; i++) {
-					var file = files[i];
-					
-					file = await File.create({
-						name: file.name, size: file.sizeBytes,
-						type: file.mimeType, path: file.url,
-						user: params.userId, icon: file.iconUrl,  source: 'google-drive',
-						createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
-						updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss')
-					}).fetch();
-
-					const task_attachment=await TaskAttachment.create({
-						file:file.id,
-						task:params.taskId
-					}).fetch();
-					
-					dbRecords.push({
-						id:task_attachment.id,
-						...file
-					});
-				}
-				return res.ok(dbRecords);
-			}
-		}
-	},
-	delete: async (req, res) => {
-		try {
-			let params = req.allParams();
-			let files = await TaskAttachment.find({ id: params.id });
-			if (files.length > 0) {
-				var file = files[0];
-				console.log(file)
-				if (file.source == 'google-drive') {
-					await TaskAttachment.destroy({ id: params.id });
-					return res.ok(params.id);
-				} else {
-					const dir = `${sails.config.appPath}/assets/${file.path}`;
-					await fs.stat(dir, async function (err, stat) {
-						if (err == null) {
-							await fs.unlink(dir, (error) => {
-								if (error) throw error;
-							});
-							await TaskAttachment.destroy({ id: params.id });
-							return res.ok(params.id);
-						} else if (err.code === 'ENOENT') {
-							console.log('not found');
-							return res.notFound("File not found");
-						} else {
-							return res.serverError(err.code);
-						}
-					});
-				}
-			}
-		} catch (error) {
-			return res.serverError(error);
-		}
-	},
-};
+			

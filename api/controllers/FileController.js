@@ -7,7 +7,16 @@
 
  const moment = require('moment-timezone');
  const fs = require('fs');
- 
+ const Buffer = require('Buffer');
+ const {Duplex,pipeline} = require('stream'); // Native Node Module 
+
+function bufferToStream(buffer) {
+    let tmp = new Duplex();
+    tmp.push(buffer);
+    tmp.push(null);
+    return tmp;
+}
+
  module.exports = {
      find: async (req, res) => {
          try {
@@ -112,31 +121,38 @@
      },
      delete: async (req, res) => {
          try {
-             let params = req.allParams();
-             let files = await File.find({ id: params.id });
-             if (files.length > 0) {
-                 var file = files[0];
-                 if (file.source == 'google-drive') {
-                     await File.destroy({ id: params.id });
-                     return res.ok(params.id);
-                 } else {
-                     const dir = `${sails.config.appPath}/assets/${file.path}`;
-                     await fs.stat(dir, async function (err, stat) {
-                         if (err == null) {
-                             await fs.unlink(dir, (error) => {
-                                 if (error) throw error;
-                             });
-                             await File.destroy({ id: params.id });
-                             return res.ok(params.id);
-                         } else if (err.code === 'ENOENT') {
-                             await File.destroy({ id: params.id });
-                             return res.notFound("File not found");
-                         } else {
-                             return res.serverError(err.code);
-                         }
-                     });
-                 }
-             }
+            let params = req.allParams();
+            let files = await File.find({ id: params.id });
+            if (files.length > 0) {
+                var file = files[0];
+                await TaskAttachment.destroy({file:params.id})
+                if (file.source == 'google-drive') {
+                    await File.destroy({ id: params.id });
+                    return res.ok(params.id);
+                } 
+                if(file.source=='upload'){
+                    const dir = `${sails.config.appPath}/assets/${file.path}`;
+                    if(file.path){
+                        await fs.stat(dir, async function (err, stat) {
+                            if (err == null) {
+                                await fs.unlink(dir, (error) => {
+                                    if (error) throw error;
+                                });
+                                await File.destroy({ id: params.id });
+                                return res.ok(params.id);
+                            } else if (err.code === 'ENOENT') {
+                                await File.destroy({ id: params.id });
+                                return res.notFound("File not found");
+                            } else {
+                                return res.serverError(err.code);
+                            }
+                        });
+                    }
+                    if(file.base64){
+                        await File.destroy({ id: params.id });
+                    }
+                }
+            }
          } catch (error) {
              return res.serverError(error);
          }
@@ -144,16 +160,28 @@
     download: async function (req,res){
         let params = req.allParams();
         let file = await File.findOne({ id: params.id });
-        if(!file) {return res.notFound();}
-        let filepath = require('path').resolve(sails.config.appPath+'//assets//'+file.path)
-        console.log(filepath,fs.existsSync(filepath));
-        if(file.source=='upload' && fs.existsSync(filepath))
-        {
-            res.setHeader('Content-disposition', 'attachment; filename=' + file.name);
-            let filestream = fs.createReadStream(filepath);
-            filestream.pipe(res);
-        }else{
-            return res.notFound("File does not exist");
+        if(!file) return res.notFound();
+        try{
+            if(file.source=='upload' && file.path )
+            {
+                let filepath = require('path').resolve(sails.config.appPath+'//assets//'+file.path)
+                if(fs.existsSync(filepath)){
+                    res.setHeader('Content-disposition', 'attachment; filename=' + file.name);
+                    let filestream = fs.createReadStream(filepath);
+                    filestream.pipe(res);
+                } else return res.notFound("File does not exist");
+            }else if(file.source=='upload' && file.base64){
+                var base64 = file.base64.split('base64,')[1];
+                const imgBuffer = Buffer.from(base64, 'base64')
+                if(Buffer.isBuffer(imgBuffer)){
+                    const readableStream = bufferToStream(imgBuffer);
+                    readableStream.pipe(res);
+                }
+                else return res.notFound("File does not exist");
+            }
+            else return res.notFound("File does not exist");
+        }catch(error){
+            return res.serverError(error);
         }
     }
  };
