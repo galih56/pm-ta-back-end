@@ -17,35 +17,40 @@ module.exports = {
 		}
 	},
 	findOne: async (req, res) => {
-		let params = req.allParams();
-		let tasks = await Task.find({ id: params.id }).populate('creator')
-			.populate('taskMembers').populate('comments')
-			.populate('logs').populate('checklists').populate('attachments').populate('tags');
+		try{
+			let params = req.allParams();
+			let tasks = await Task.find({ id: params.id }).populate('creator')
+				.populate('taskMembers').populate('comments')
+				.populate('logs').populate('checklists').populate('attachments').populate('tags');
 
-		if (tasks.length > 0) {
-			var task = tasks[0];
-			const tags = task.tags.map(async tagRelation => {
-				return await Tag.findOne({ id: tagRelation.tag });
-			});
-			task.tags = await Promise.all(tags);
+			if (tasks.length > 0) {
+				var task = tasks[0];
+				const tags = task.tags.map(async tagRelation => {
+					return await Tag.findOne({ id: tagRelation.tag });
+				});
+				task.tags = await Promise.all(tags);
 
-			const members = task.taskMembers.map(async memberRelation => {
-				var member = await ProjectMember.findOne({ id: memberRelation.member }).populate('user').populate('role');
-				member = { ...member.user, ...member.role };
-				return member;
-			});
-			task.members = await Promise.all(members);
-			
-			const attachments=task.attachments.map(async (attachment)=>{
-				var file=await File.findOne({id:attachment.file}).populate('user');
-				file.files_id=attachment.file
-				file.id=attachment.id;
-				return file;
-			});
-			task.attachments = await Promise.all(attachments);
-			return res.send(task);
+				const members = task.taskMembers.map(async memberRelation => {
+					var member = await ProjectMember.findOne({ id: memberRelation.member }).populate('user').populate('role');
+					member = { ...member.user, ...member.role };
+					return member;
+				});
+				task.members = await Promise.all(members);
+				
+				const attachments=task.attachments.map(async (attachment)=>{
+					var file=await File.findOne({id:attachment.file}).populate('user');
+					file.files_id=attachment.file
+					file.id=attachment.id;
+					return file;
+				});
+				task.attachments = await Promise.all(attachments);
+				return res.send(task);
+			}
+			return res.notFound();
+
+		}catch(err){
+			return res.serverError(err)
 		}
-		return res.notFound();
 	},
 	create: async (req, res) => {
 		try {
