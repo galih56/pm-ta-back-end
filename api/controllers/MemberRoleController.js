@@ -5,6 +5,7 @@
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
 
+ const moment = require('moment-timezone');
 module.exports = {
 	find: async (req,res)=>{
 		try {
@@ -38,7 +39,7 @@ module.exports = {
 			            	name: params.name, 
 			            	color: params.color, 
 			            	bgColor: params.bgColor,
-			            });
+			            }).fetch();
 	      	return res.ok(roles);
 	    }
 	    catch (err){
@@ -49,14 +50,14 @@ module.exports = {
 		try {
 			let params = req.allParams();
 			let attributes = {};
-			
-			if(params.title) attributes.title = params.title;
-			if(params.description) attributes.description = params.description; 
+			if(params.name) attributes.name = params.name;
 			if(params.color) attributes.color = params.color; 
 			if(params.bgColor) attributes.bgColor = params.bgColor; 
-			
-			const results = await Mahasiswa.update({id: params.id}, attributes, {updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss')});
-			return res.ok(results);
+			const results = await MemberRole.update({ id: params.id }, attributes).fetch();
+			if(results){
+				return res.json(results[0]);
+			}
+			return res.json(results);
 		} catch (err) {
 			return res.serverError(err);
 		}

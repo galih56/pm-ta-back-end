@@ -9,7 +9,7 @@ const moment = require('moment-timezone');
 module.exports = {
     find: async (req, res) => {
         try {
-            let meetings = await Meeting.find().populate('meetingMembers');
+            let meetings = await Meeting.find().populate('meetingMembers').populate('creator').populate('project');
             return res.send(meetings);
         }
         catch (err) {
@@ -20,7 +20,8 @@ module.exports = {
         let params = req.allParams();
         try {
             if (params.id) {
-                let meetings = await Meeting.find({ id: params.id });
+                let meetings = await Meeting.find({ id: params.id }).populate('meetingMembers').populate('creator').populate('project');
+                
                 if (meetings.length > 0) {
                     return res.send(meetings[0]);
                 }
@@ -41,7 +42,6 @@ module.exports = {
                 start: params.start,
                 end: params.end,
                 project:params.projects_id,
-                link: params.link,
                 creator:params.users_id,
                 createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
                 updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
@@ -73,10 +73,14 @@ module.exports = {
             if (params.description) attributes.description = params.description;
             if (params.start) attributes.start = params.start;
             if (params.end) attributes.end = params.end;
-            if (params.link) attributes.link = params.link;
+			if ('googleCalendarInfo' in params) attributes.googleCalendarInfo = params.googleCalendarInfo;
+            if (params.creator) attributes.creator = params.creator.id;
+            
             attributes.updatedAt = moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
-            const results = await Meeting.update({ id: params.id }, attributes);
-            return res.ok(results);
+            const results = await Meeting.update({ id: params.id }, attributes).fetch();
+            if(results.length){
+                return res.json(results[0]);
+            }else return res.json(results);
         } catch (err) {
             return res.serverError(err);
         }

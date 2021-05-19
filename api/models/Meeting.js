@@ -23,9 +23,9 @@ module.exports = {
       type: 'string',
       columnName: 'description',
     },
-    link: {
-      type: 'string',
-      columnName: 'link',
+    googleCalendarInfo: {
+      type: 'json',
+      columnName: 'google_calendar_info',
     },
     start: {
       type: 'ref', 

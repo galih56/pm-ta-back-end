@@ -16,7 +16,7 @@ module.exports = {
     },
     user: {
       columnName: 'users_id',
-      model: 'User', // many to 1 with user
+      model: 'User',
     },
     taskMember: {
       collection: 'TaskMember',

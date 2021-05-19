@@ -8,8 +8,8 @@ const moment = require('moment-timezone');
 module.exports = {
 	find: async (req, res) => {
 		try {
-			let roles = await ProjectMember.find();
-			return res.send(roles);
+			let members = await ProjectMember.find();
+			return res.send(members);
 		}
 		catch (err) {
 			return res.serverError(err);
@@ -19,13 +19,37 @@ module.exports = {
 		let params = req.allParams();
 		try {
 			if (params.id) {
-				let roles = await ProjectMember.find({ id: params.id });
-				if (roles > 0) {
-					return res.send(roles[0]);
+				let members = await ProjectMember.find({ id: params.id }).populate('user').populate('role');
+				if (members.length > 0) {
+					var detailUser=members[0].user;
+					delete detailUser.password;
+					delete detailUser.token;
+					var detailRole=members[0].role;
+					var member={ id:members[0].id,user:detailUser, role:detailRole};
+					return res.send(member);
 				}
 				return res.notFound();
 			}
 			return res.notFound();
+		}
+		catch (err) {
+			return res.serverError(err);
+		}
+	},
+	getTasks : async function(req,res){
+		try {
+			let params = req.allParams();
+			var query=`
+				SELECT t.id,t.title,t.description, t.start,t.end,t.progress,t.complete,t.updated_at,t.created_at
+				FROM public.project_members as pm
+				INNER JOIN task_members as tm 
+					ON  tm.project_members_id=pm.id
+				INNER JOIN tasks as t
+					ON tm.tasks_id=t.id
+				WHERE pm.id=$1`;
+			let tasks = await ProjectMember.getDatastore().sendNativeQuery(query, [params.id]);
+			tasks = tasks.rows;
+			return res.send(tasks);
 		}
 		catch (err) {
 			return res.serverError(err);
@@ -49,6 +73,10 @@ module.exports = {
 					insertedMembers.push(newMember);
 				}
 			}
+			var insertedMemberIDs=insertedMembers.map(function(member){
+				return member.id
+			});
+			insertedMembers=await ProjectMember.find({id: insertedMemberIDs }).populate('user').populate('role')
 			return res.ok(insertedMembers);
 		}
 		catch (err) {
@@ -59,13 +87,24 @@ module.exports = {
 		try {
 			let params = req.allParams();
 			let attributes = {};
-
-			if (params.user_id) attributes.user = params.user_id;
-			if (params.projects_id) attributes.project = params.projects_id;
-			if (params.roles_id) attributes.role = params.roles_id;
-
-			const results = await ProjectMember.update({ id: params.id }, attributes, { updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss') });
-			return res.ok(results);
+			if (params.role) attributes.role = params.role.id;
+			attributes.updatedAt = moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
+			
+			await ProjectMember.update({ id: params.id },attributes);
+			let members = await ProjectMember.find({ id: params.id }).populate('user').populate('role');
+			if (members.length > 0) {
+				var detailUser=members[0].user;
+				delete detailUser.password;
+				delete detailUser.token;
+				var detailRole=members[0].role;
+				var member={ 
+					id:members[0].id,
+					user:detailUser, 
+					role:detailRole
+				};
+				return res.send(member);
+			}
+			return res.notFound();
 		} catch (err) {
 			return res.serverError(err);
 		}

@@ -309,42 +309,9 @@ module.exports = {
 			return res.serverError(err);
 		}
 	},
-	zoomAuthentication:async function (req,res){
+	githubRedirect:async function (req,res){
 		var params=req.allParams();
-		try {
-			const b = Buffer.from(process.env.ZOOM_API_OAUTH_CLIENT_ID+ ":" + process.env.ZOOM_API_OAUTH_CLIENT_SECRET);
-			console.log('B : ',b)
-			const zoomRes = await fetch(`https://zoom.us/oauth/token?grant_type=authorization_code&code=${params.code}&redirect_uri=${process.env.ZOOM_REDIRECT_URL}`, {
-			  method: "POST",
-			  headers: {
-				Authorization: `Basic ${b.toString("base64")}`,
-			  },
-			});
-			console.log(zoomRes)
-			if(!zoomRes.ok)
-			  return res.status(401).send("Could not connect with Zoom");
-			const zoomData = await zoomRes.json();
-			if (zoomData.error)
-			  return res.status(401).send("Could not connect with Zoom");
-			// Retreive user details
-			const zoomUserRes = await fetch("https://api.zoom.us/v2/users/me", {
-			  method: "GET",
-			  headers: {
-				Authorization: `Bearer ${zoomData.access_token}`,
-			  },
-			});
-			const zoomUserData = await zoomUserRes.json();
-			return res.send({
-				email:zoomUserData.email,
-				account_id:zoomUserData.account_id,
-				access_token:zoomData.access_token,
-				refresh_token:zoomData.refresh_token,
-				expires_in: zoomData.expires_in 
-			});
-		  } catch (e) {
-			  console.log('Zoom Authentication Errors : ',e);
-			return res.status(500).send("Something went wrong");
-		  }
+		return res.send(params);
 	},
 	sendVerificationMail: async function (req, res) {
 		let newUser = {

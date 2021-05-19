@@ -65,7 +65,12 @@ module.exports = {
 
 					let members = await ProjectMember.find({ project: projectDetail.id }).populate('role').populate('user');
 					members = members.map((member) => {
-						member = { ...member.user, role: { ...member.role } };
+						delete member.user.password
+						member = { 
+							id:member.id, 
+							user: member.user, 
+							role: { ...member.role } 
+						};
 						return member;
 					});
 					projectDetail.members = members;

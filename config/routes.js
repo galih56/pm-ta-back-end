@@ -23,6 +23,7 @@ module.exports.routes = {
   'POST /user/:id/project': 'UserController.createProject',
   'PATCH /user/:id': 'UserController.update',
   'DELETE /user/:id': 'UserController.delete',
+  'GET /github-redirect': 'UserController.githubRedirect',
   'GET /user/sendemail': 'UserController.sendVerificationMail',
   'GET /user/verifyemail': 'UserController.verifyEmail',
 
@@ -78,6 +79,7 @@ module.exports.routes = {
   'POST /member': 'ProjectMemberController.create',
   'GET /member': 'ProjectMemberController.find',
   'GET /member/:id': 'ProjectMemberController.findOne',
+  'GET /member/:id/tasks': 'ProjectMemberController.getTasks',
   'PATCH /member/:id': 'ProjectMemberController.update',
   'DELETE /member/:id': 'ProjectMemberController.delete',
 

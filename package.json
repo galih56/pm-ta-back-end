@@ -9,6 +9,7 @@
     "@sailshq/lodash": "^3.10.3",
     "@sailshq/socket.io-redis": "^5.2.0",
     "Buffer": "0.0.0",
+    "axios": "^0.21.1",
     "bcrypt": "^5.0.0",
     "fetch": "^1.1.0",
     "jsonwebtoken": "^8.5.1",
