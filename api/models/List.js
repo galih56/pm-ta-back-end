@@ -34,6 +34,26 @@ module.exports = {
       columnName: 'projects_id',
       model: 'Project'
     },
+    actualEnd:{
+      type: 'ref', 
+      columnType: 'timestamp' ,
+      columnName: 'actual_end',
+    },
+    actualStart:{
+      type: 'ref', 
+      columnType: 'timestamp' ,
+      columnName: 'actual_start',
+    },
+    start:{
+      type: 'ref', 
+      columnType: 'timestamp' ,
+      columnName: 'start',
+    },
+    end:{
+      type: 'ref', 
+      columnType: 'timestamp' ,
+      columnName: 'end',
+    },
     createdAt: { columnName: 'created_at', type: 'ref', columnType: 'timestamp' },
     updatedAt: { columnName: 'updated_at', type: 'ref', columnType: 'timestamp' }
   },

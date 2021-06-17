@@ -37,6 +37,8 @@ module.exports = {
 			let params = req.allParams();
 			const data = {
 				title: params.title,
+				start: params.start,
+				end: params.end,
 				project: Number(params.projects_id),
 				createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
 				updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
@@ -53,6 +55,8 @@ module.exports = {
 			let params = req.allParams();
 			let attributes = {};
 			if (params.title) attributes.title = params.title;
+			if (params.start) attributes.start = params.start;
+			if (params.end) attributes.end = params.end;
 			attributes.updatedAt = moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
 			const results = await List.update({ id: params.id }, attributes);
 			return res.ok(results);

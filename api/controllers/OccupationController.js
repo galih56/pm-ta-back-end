@@ -108,16 +108,16 @@ module.exports = {
 	create: async (req, res) => {
 		try {
 			let params = req.allParams();
-			let occupations = await Occupation.create({ name: params.name, color: params.color, bgColor: params.bgColor, }).fetch();
+			let occupation = await Occupation.create({ name: params.name, description:params.description }).fetch();
 
 			if (params.children.length > 0) {
 				var children = params.children;
 				for (let i = 0; i < children.length; i++) {
 					const child = children[i];
-					await OccupationRelation.create({ parent: occupations.id, child: child.id });
+					await OccupationRelation.create({ parent: occupation.id, child: child.id });
 				}
 			}
-			occupations = await Occupation.find({ id: occupations.id })
+			occupation = await Occupation.find({ id: occupation.id })
 				.populate('parentRelations')
 				.populate('childrenRelations');
 			occupation = await getParentAndChildren(occupation);

@@ -79,6 +79,10 @@ module.exports = {
       collection: 'MeetingMember',
       via: 'user'
     },
+    teams: {
+      collection: 'TeamsHasUsers',
+      via: 'user'
+    },
     createdAt: { columnName: 'created_at', type: 'ref', columnType: 'timestamp' },
     updatedAt: { columnName: 'updated_at', type: 'ref', columnType: 'timestamp' }
 },

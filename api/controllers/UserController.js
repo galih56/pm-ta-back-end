@@ -4,6 +4,7 @@
  * @description :: Server-side actions for handling incoming requests.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
+var axios = require('axios');
 var fetch = require("node-fetch");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -157,7 +158,7 @@ module.exports = {
 					var config = { expiresIn: 60 * 60 * 24 * 1000 };
 					if (params.remember == true) config = {};
 
-					await User.update({ id: user.id }, { last_login: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss') }).fetch();
+					await User.update({ id: user.id }, { last_login: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss') });
 					jwt.sign(payload, SECRET, config, (err, token) => {
 						const auth_data = { success: true, token: 'Bearer ' + token, user: user }
 						req.session.user = user;
@@ -178,7 +179,7 @@ module.exports = {
 	getProjects: async function (req, res) {
 		const params = req.allParams();
 		const user_id = params.id;
-
+		
 		try {
 			await ProjectMember.find().where({ 'user': user_id })
 				.populate('project')
@@ -186,7 +187,6 @@ module.exports = {
 				.exec(async (error, result) => {
 					if (error)  return res.serverError(error); 
 					result = result.map(async (member) => {
-						//get the tasks of a list
 						let lists = await List.find().where({ project: member.project.id }).populate('tasks').sort('position ASC');
 
 						lists = lists.map(list => {
@@ -215,26 +215,48 @@ module.exports = {
 		let params = req.allParams();
 		let users_id = params.users_id;
 		
-		var newProject = {
-			title: params.title, description: params.description,
-			estimationDeadline: params.estimationDeadline,
-			createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
-			updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
-		}
+		var attributes = { }
+		if(params.title) attributes.title=params.title;
+		if(params.start) attributes.start=params.start;
+		if(params.end) attributes.end=params.end;
+		if(params.users) attributes.users=params.users;
+		attributes.createdAt=moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
+		attributes.updatedAt=moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
 		
-		await Project.create(newProject)
+		await Project.create(attributes)
 			.fetch()
 			.exec(async function (err, project) {
 				if (err) return res.serverError(err);
 				else {
-					var newMember = {
-						project: project.id,
-						user: users_id,
-						role: 2,
-						createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
-						updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
+					var insertedMember=[];	
+					if(params.project_owner){
+						var project_owner=params.project_owner;
+						project_owner=project_owner.map(async user => {
+							var projectMember=null;
+							if(typeof user == 'object'){
+								projectMember=await ProjectMember.create({project:project.id,user:user.id,role:1}).fetch()
+							}else{
+								projectMember=await ProjectMember.create({project:project.id,user:user,role:1}).fetch()
+							}
+							insertedMember.push(projectMember);
+						});
+						project.members=insertedMember;
 					}
-					var newMember=await ProjectMember.create(newMember).fetch();
+					if(params.project_manager){
+						var project_manager=params.project_manager;
+						var insertedMember=[];
+						project_manager=project_manager.map(async user => {
+							var projectMember=null;
+							if(typeof user == 'object'){
+								projectMember=await ProjectMember.create({project:project.id,user:user.id,role:2}).fetch()
+							}else{
+								projectMember=await ProjectMember.create({project:project.id,user:user,role:2}).fetch()
+							}
+							insertedMember.push(projectMember);
+						});
+						project.members=insertedMember;
+					}
+					project.members=insertedMember;
 				}
 				project.columns = [];
 				return res.ok(project);
@@ -244,8 +266,9 @@ module.exports = {
 		try {
 			let params = req.allParams();
 			var query=`
-			SELECT t.id,t.title,t.complete,t.description,t.users_id,u.name as creator_name,u.email as creator_email
-				,t.lists_id,l.title as lists_title,l.projects_id,p.title as projects_title
+			SELECT t.id, t.title,t.complete, t.description, t.start,t.end, t.users_id, 
+				u.name as creator_name,u.email as creator_email,
+				t.lists_id,l.title as lists_title,l.projects_id,p.title as projects_title
 			FROM tasks AS t 
 			INNER JOIN lists as l
 				ON t.lists_id=l.id
@@ -309,10 +332,30 @@ module.exports = {
 			return res.serverError(err);
 		}
 	},
-	githubRedirect:async function (req,res){
+	getGithubAccessToken:async function (req,res){
 		var params=req.allParams();
+		const GITHUB_AUTH_ACCESSTOKEN_URL = 'https://github.com/login/oauth/access_token';
+		const CLIENT_ID = '60c4703444a36d8057ac';
+		const CLIENT_SECRET = '5747b8f92feeb7bf03b8519511a1239ee7ea19bf';
+		const CODE = params.code;
+
+		await axios({
+		  method: 'POST',  url: GITHUB_AUTH_ACCESSTOKEN_URL,
+		  headers : { "Accept": "application/json" },
+		  data: { client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code: CODE }
+		})
+		.then(function (response) {
+			// await axios({
+
+			// })
+			return res.json(response.data)
+		})
+		.catch(function (error) {
+		  	return res.serverError(error.message);
+		})
 		return res.send(params);
 	},
+
 	sendVerificationMail: async function (req, res) {
 		let newUser = {
 			name: 'teshalo', password: 'password',

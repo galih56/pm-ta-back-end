@@ -9,18 +9,51 @@ const moment = require('moment-timezone');
 module.exports = {
 	find: async (req, res) => {
 		try {
+			var params =req.allParams();
 			let projects = await Project.find().populate('members').populate('lists');
 			let newProjects = [];
 			if (projects.length > 0) {
 				for (let i = 0; i < projects.length; i++) {
-					const project = projects[i];
-					const members = project.members;
-					for (let j = 0; j < members.length; j++) {
-						const member = members[j];
-						newProjects.push(project);
-						// if (member.user == req.session.user.id) newProjects.push(project);
-						break;
-					}
+					const projectDetail = projects[i];
+					var newLists = projectDetail.lists.map(async (list) => {
+						// Async function always return promise
+						// .map() has no concept of asynchronicity
+						// https://stackoverflow.com/questions/47557128/why-does-async-array-map-return-promises-instead-of-values
+						// https://stackoverflow.com/questions/39452083/using-promise-function-inside-javascript-array-map
+						var tasks = await Task.find().populate('tags')
+											.populate('creator')
+											.populate('childrenTasks')
+											.where({ list: list.id });
+											
+						tasks = tasks.map(async task => {
+							task.cards=task.childrenTasks;
+							delete task.childrenTasks;
+							var newTags = task.tags.map(async tagRelation => await Tag.findOne({ id: tagRelation.tag }));
+							task.tags = await Promise.all(newTags);
+							return task;
+						});
+						tasks = await Promise.all(tasks);
+						Object.assign(list, { cards: tasks });
+						delete list.tasks;
+						list.id = '' + list.id; //Change number to string, required for kanban view
+						return list;
+					});
+					//handle promise from anonymous function within .map()
+					newLists = await Promise.all(newLists);
+					//change property name lists to columns for kanban/gantt rendering purpose
+					Object.assign(projectDetail, { columns: newLists });
+					delete projectDetail['lists'];
+
+					let members = await ProjectMember.find({ project: projectDetail.id })
+														.populate('role')
+														.populate('user');
+					members = members.map((member) => {
+						delete member.user.password
+						member =  { project_member_id: member.id, ...member.user, role:member.role };
+						return member;
+					});
+					projectDetail.members = members;
+					newProjects.push(projectDetail);
 				}
 			}
 			projects = newProjects;
@@ -45,8 +78,14 @@ module.exports = {
 						// .map() has no concept of asynchronicity
 						// https://stackoverflow.com/questions/47557128/why-does-async-array-map-return-promises-instead-of-values
 						// https://stackoverflow.com/questions/39452083/using-promise-function-inside-javascript-array-map
-						var tasks = await Task.find().populate('tags').where({ list: list.id });
+						var tasks = await Task.find().populate('tags')
+											.populate('creator')
+											.populate('childrenTasks')
+											.where({ list: list.id });
+											
 						tasks = tasks.map(async task => {
+							task.cards=task.childrenTasks;
+							delete task.childrenTasks;
 							var newTags = task.tags.map(async tagRelation => await Tag.findOne({ id: tagRelation.tag }));
 							task.tags = await Promise.all(newTags);
 							return task;
@@ -63,14 +102,12 @@ module.exports = {
 					Object.assign(projectDetail, { columns: newLists });
 					delete projectDetail['lists'];
 
-					let members = await ProjectMember.find({ project: projectDetail.id }).populate('role').populate('user');
+					let members = await ProjectMember.find({ project: projectDetail.id })
+														.populate('role')
+														.populate('user');
 					members = members.map((member) => {
 						delete member.user.password
-						member = { 
-							id:member.id, 
-							user: member.user, 
-							role: { ...member.role } 
-						};
+						member =  { project_member_id: member.id, ...member.user, role:member.role };
 						return member;
 					});
 					projectDetail.members = members;
@@ -78,6 +115,16 @@ module.exports = {
 				} else {
 					Object.assign(projectDetail, { columns: [] });
 					delete projectDetail['lists'];
+					
+					let members = await ProjectMember.find({ project: projectDetail.id })
+														.populate('role')
+														.populate('user');
+					members = members.map((member) => {
+						delete member.user.password
+						member =  { project_member_id: member.id, ...member.user, role:member.role };
+						return member;
+					});
+					projectDetail.members = members;
 					return res.send(projectDetail);
 				}
 			}
@@ -89,14 +136,46 @@ module.exports = {
 	},
 	create: async (req, res) => {
 		let params = req.allParams();
+		var attributes={};
+		if(params.title) attributes.title=params.title;
+		if(params.description) attributes.description=params.description;
+		if(params.start) attributes.start=params.start;
+		if(params.end) attributes.end=params.end;
+		if(params.project_owner) attributes.project_owner=params.project_owner;
+		if(params.project_manager) attributes.project_manager=params.project_manager;
+		attributes.createdAt=moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
+		attributes.updatedAt=moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
+		
 		try {
-			let project = await Project.create({
-				title: params.title,
-				description: params.description,
-				estimationDeadline: params.estimationDeadline,
-				createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
-				updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
-			}).fetch();
+			let project = await Project.create(attributes).fetch();
+			var insertedMember=[];
+			if(params.project_owner){
+				var project_owner=params.project_owner;
+				project_owner=project_owner.map(async user => {
+					var projectMember=null;
+					if(typeof user == 'object'){
+						projectMember=await ProjectMember.create({project:project.id,user:user.id,role:1}).fetch()
+					}else{
+						projectMember=await ProjectMember.create({project:project.id,user:user,role:1}).fetch()
+					}
+					insertedMember.push(projectMember);
+				});
+				project.members=insertedMember;
+			}
+			if(params.project_manager){
+				var project_manager=params.project_manager;
+				var insertedMember=[];
+				project_manager=project_manager.map(async user => {
+					var projectMember=null;
+					if(typeof user == 'object'){
+						projectMember=await ProjectMember.create({project:project.id,user:user.id,role:2}).fetch()
+					}else{
+						projectMember=await ProjectMember.create({project:project.id,user:user,role:2}).fetch()
+					}
+					insertedMember.push(projectMember);
+				});
+				project.members=insertedMember;
+			}
 			return res.ok(project);
 		}
 		catch (err) {
@@ -110,9 +189,13 @@ module.exports = {
 
 			if (params.title) attributes.title = params.title;
 			if (params.description) attributes.description = params.description;
-			if (params.estimationDeadline) attributes.estimationDeadline = params.estimationDeadline;
+			if (params.actualStart) attributes.actualStart = params.actualStart;
+			if (params.actualEnd) attributes.actualEnd = params.actualEnd;
+			if (params.start) attributes.start = params.start;
+			if (params.end) attributes.end = params.end;
+			
 			attributes.updatedAt = moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
-			const results = await Project.update({ id: params.id }, attributes);
+			const results = await Project.update({ id: params.id }, attributes).fetch();
 			return res.ok(results);
 		} catch (err) {
 			return res.serverError(err);
@@ -123,6 +206,8 @@ module.exports = {
 		try {
 			await ProjectMember.destroy({ project: params.id });
 			await List.destroy({ project: params.id });
+			await Meeting.destroy({ project: params.id });
+			
 			const results = await Project.destroy({
 				id: params.id
 			});
@@ -189,7 +274,7 @@ module.exports = {
 				var files = await TaskAttachment.getDatastore().sendNativeQuery(`
 				SELECT f.id, f.name AS file_name, f.type, f.path, f.size, 
 					t.id as tasks_id, f.users_id, f.updated_at, f.created_at, 
-					t.title AS task_title, t.start,t.end,f.source, f.icon, 
+					t.title AS task_title,t.actual_start,t.actual_end, t.start,t.end,f.source, f.icon, 
 					p.id as projects_id, p.title as project_title, u.name AS user_name,u.email,
 					l.id AS lists_id, l.title as list_title
 				FROM public.task_attachments AS ta

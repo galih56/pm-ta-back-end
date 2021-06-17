@@ -5,6 +5,7 @@
  * @help        :: See https://sailsjs.com/docs/concepts/actions
 */
 const moment = require('moment-timezone');
+
 module.exports = {
 	find: async (req, res) => {
 		try {
@@ -39,16 +40,11 @@ module.exports = {
 	getTasks : async function(req,res){
 		try {
 			let params = req.allParams();
-			var query=`
-				SELECT t.id,t.title,t.description, t.start,t.end,t.progress,t.complete,t.updated_at,t.created_at
-				FROM public.project_members as pm
-				INNER JOIN task_members as tm 
-					ON  tm.project_members_id=pm.id
-				INNER JOIN tasks as t
-					ON tm.tasks_id=t.id
-				WHERE pm.id=$1`;
-			let tasks = await ProjectMember.getDatastore().sendNativeQuery(query, [params.id]);
-			tasks = tasks.rows;
+			var taskMembers=await TaskMember.find({member:params.id});
+			taskMembers=taskMembers.map( async function(member){
+				return await Task.findOne({id:member.task}).populate('list').populate('creator');
+			});
+			var tasks=await Promise.all(taskMembers)
 			return res.send(tasks);
 		}
 		catch (err) {
@@ -76,7 +72,10 @@ module.exports = {
 			var insertedMemberIDs=insertedMembers.map(function(member){
 				return member.id
 			});
-			insertedMembers=await ProjectMember.find({id: insertedMemberIDs }).populate('user').populate('role')
+			insertedMembers=await ProjectMember.find({id: insertedMemberIDs }).populate('user').populate('role');
+			insertedMembers=insertedMembers.map(function(member){
+				return { ...member.user,role:member.role,project_member_id:member.project}
+			})
 			return res.ok(insertedMembers);
 		}
 		catch (err) {
@@ -112,6 +111,7 @@ module.exports = {
 	delete: async (req, res) => {
 		try {
 			let params = req.allParams();
+			await TaskMember.destroy({member:params.id});
 			const results = await ProjectMember.destroy({
 				id: params.id
 			});

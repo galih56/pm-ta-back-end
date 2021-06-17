@@ -29,29 +29,46 @@ module.exports = {
             type: 'string',
             columnName: 'description',
         },
-        label: {
-            type: 'string',
-            columnName: 'label',
-            allowNull: true
-        },
         complete: {
             type: 'boolean',
             columnName: 'complete',
             columnType: 'boolean'
         },
-        end: {
-            columnName: 'end',
+        end:{
+          type: 'ref', 
+          columnType: 'timestamp' ,
+          columnName: 'end',
+        },
+        start:{
+          type: 'ref', 
+          columnType: 'timestamp' ,
+          columnName: 'start',
+        },
+        actualEnd: {
+            columnName: 'actual_end',
             type: 'ref',
             columnType: 'timestamp'
         },
-        start: {
-            columnName: 'start',
+        actualStart: {
+            columnName: 'actual_start',
             type: 'ref',
             columnType: 'timestamp'
+        }, 
+        startLabel: {
+            type: 'string',
+            columnName: 'start_label',
+        }, 
+        endLabel: {
+            type: 'string',
+            columnName: 'end_label',
         },
         progress: {
             columnName: 'progress',
             type: 'number'
+        },
+        isSubtask: {
+            columnName: 'isSubtask',
+            type: 'boolean'
         },
         list: {
             columnName: 'lists_id',
@@ -69,16 +86,20 @@ module.exports = {
             collection: 'TasksHasTags',
             via: 'task'
         },
+        childrenTasks: {
+            collection: 'Task',
+            via: 'parentTask'
+        },
+        parentTask:{
+            columnName: 'parent_task_id',
+            model: 'Task'
+        },
         attachments: {
             collection: 'TaskAttachment',
             via: 'task'
         },
         taskMembers: {
             collection: 'TaskMember',
-            via: 'task'
-        },
-        checklists: {
-            collection: 'Checklist',
             via: 'task'
         },
         createdAt: { columnName: 'created_at', type: 'ref', columnType: 'timestamp' },

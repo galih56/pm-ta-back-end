@@ -25,10 +25,25 @@ module.exports = {
       type: 'string',
       columnName: 'description',
     },
-    estimationDeadline:{
+    actualEnd:{
       type: 'ref', 
       columnType: 'timestamp' ,
-      columnName: 'estimation_deadline',
+      columnName: 'actual_end',
+    },
+    actualStart:{
+      type: 'ref', 
+      columnType: 'timestamp' ,
+      columnName: 'actual_start',
+    },
+    start:{
+      type: 'ref', 
+      columnType: 'timestamp' ,
+      columnName: 'start',
+    },
+    end:{
+      type: 'ref', 
+      columnType: 'timestamp' ,
+      columnName: 'end',
     },
     members: {
       collection: 'ProjectMember',
@@ -40,6 +55,14 @@ module.exports = {
     },
     meetings: {
       collection: 'Meeting',
+      via: 'project'
+    },
+    githubRepositories: {
+      collection: 'GithubRepository',
+      via: 'project'
+    },
+    teams: {
+      collection: 'TeamsHasProjects',
       via: 'project'
     },
     createdAt: { 

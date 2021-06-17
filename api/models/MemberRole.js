@@ -21,14 +21,6 @@ module.exports = {
       type: 'string',
       columnName: 'name'
     },
-    color: {
-      type: 'string',
-      columnName: 'color'
-    },
-    bgColor: {
-      type: 'string',
-      columnName: 'bg-color'
-    },
     members: {
       collection: 'ProjectMember',
       via: 'role'

@@ -23,7 +23,7 @@ module.exports.routes = {
   'POST /user/:id/project': 'UserController.createProject',
   'PATCH /user/:id': 'UserController.update',
   'DELETE /user/:id': 'UserController.delete',
-  'GET /github-redirect': 'UserController.githubRedirect',
+  'POST /get-github-access-token': 'UserController.getGithubAccessToken',
   'GET /user/sendemail': 'UserController.sendVerificationMail',
   'GET /user/verifyemail': 'UserController.verifyEmail',
 
@@ -58,9 +58,6 @@ module.exports.routes = {
   'GET /task/:id': 'TaskController.findOne',
   'PATCH /task/:id': 'TaskController.update',
   'DELETE /task/:id': 'TaskController.delete',
-  'POST /task/:id/checklist': 'TaskController.addChecklist',
-  'PATCH /task/:taskId/checklist/:checklistId': 'TaskController.updateChecklist',
-  'DELETE /task/:taskId/checklist/:checklistId': 'TaskController.removeChecklist',
 
   //TaskAttachments
   'POST /task-attachments': 'TaskAttachmentController.create',
@@ -106,4 +103,30 @@ module.exports.routes = {
   'DELETE /meeting/:id': 'MeetingController.delete',
   'GET /meeting/respond-to-zoom': 'MeetingController.respondToZoom',
 
+  //GithubRepository
+  'POST /github-repository': 'GithubRepositoryController.create',
+  'GET /github-repository': 'GithubRepositoryController.find',
+  'GET /project/:id/github-repository': 'GithubRepositoryController.find',
+  'GET /github-repository/:id': 'GithubRepositoryController.findOne',
+  'PATCH /github-repository/:id': 'GithubRepositoryController.update',
+  'DELETE /github-repository/:id': 'GithubRepositoryController.delete',
+
+  
+  //Team
+  'POST /team': 'TeamController.create',
+  'GET /team': 'TeamController.find',
+  'GET /team/:id': 'TeamController.findOne',
+  'PATCH /team/:id': 'TeamController.update',
+  'DELETE /team/:id': 'TeamController.delete',
+  
+  'POST /team-member': 'TeamController.create',
+  'DELETE /team-member/:id': 'TeamController.delete',
+
+  
+  //task member
+  'POST /task-member': 'TaskMemberController.create',
+  'GET /task-member': 'TaskMemberController.find',
+  'GET /task-member/:id': 'TaskMemberController.findOne',
+  'PATCH /task-member/:id': 'TaskMemberController.update',
+  'DELETE /task-member/:id': 'TaskMemberController.delete',
 };

@@ -34,13 +34,26 @@ module.exports = {
 	create: async (req, res) => {
 		try {
 			let params = req.allParams();
-			let taskMember = await TaskMember.create({
-				task: params.tasks_id,
-				member: params.project_members_id,
-				createdAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
-				updatedAt: moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss'),
-			});
-			return res.ok(taskMember);
+			if('users' in params){
+				var users=params.users;
+				var insertedUsers=[]
+				insertedUsers=users.map(async (user) => {
+					let taskMember = await TaskMember.create({
+						task: params.taskId,
+						member: user.project_member_id,
+						user:user.id
+					}).fetch();
+					return {task_member_id:taskMember.id,...user,...taskMember};
+				});
+				insertedUsers=await Promise.all(insertedUsers);
+				return res.ok(insertedUsers);
+			}else{
+				let taskMember = await TaskMember.create({
+					task: params.tasks_id,
+					member: params.project_member_id,
+				});
+				return res.ok(taskMember);
+			}
 		}
 		catch (err) {
 			return res.serverError(err);
@@ -52,7 +65,6 @@ module.exports = {
 			let attributes = {};
 			if (params.tasks_id) attributes.task = params.tasks_id;
 			if (params.project_members_id) attributes.member = params.project_members_id;
-			attributes.updatedAt = moment().tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
 			const results = await TaskMember.update({ id: params.id }, attributes);
 			return res.ok(results);
 		} catch (err) {

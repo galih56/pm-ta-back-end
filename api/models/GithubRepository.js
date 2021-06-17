@@ -1,12 +1,12 @@
 /**
- * Checklist.js
+ * Projects.js
  *
  * @description :: A model definition represents a database table/collection.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
 module.exports = {
-  tableName: 'checklists',
+  tableName: 'github_repositories',
   // By default sails will generate primary key id if you don't specify any.
   // If you want custom data as your primary key, you can override the id attribute in the model and give a columnName
   primaryKey: 'id',
@@ -17,26 +17,20 @@ module.exports = {
       autoIncrement: true,
       unique: true
     },
-    title: {
+    owner_name: {
       type: 'string',
-      columnName: 'title',
-      required: true,
+      columnName: 'owner_name',
     },
-    deadline: {
+    repository_name: {
       type: 'string',
-      columnName: 'deadline',
+      columnName: 'repository_name',
     },
-    isChecked: {
-      type: 'boolean',
-      columnName: 'isChecked',
-    },
-    task: {
-      model: 'Task',
-      columnName: 'tasks_id',
+    project: {
+      columnName: 'projects_id',
+      model: 'Project',
     },
     createdAt: false,
     updatedAt: false,
   },
 };
-
 
